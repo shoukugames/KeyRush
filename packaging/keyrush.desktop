@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Key Rush
+GenericName=Typing Memory Game
+Comment=Watch the home-row keys light up, then type them back in order
+Exec=keyrush
+Icon=keyrush
+Terminal=false
+Categories=Game;LogicGame;Education;
+Keywords=typing;memory;simon;home row;keyboard;kids;
