@@ -4,7 +4,8 @@ import math
 import pygame
 
 from . import ui
-from .config import FINGER_COLORS, FINGERS, HOME_ROW, SOFT, WIDTH, key_label
+from .config import FINGER_COLORS, HOME_ROW, SOFT, WIDTH, key_label
+from .i18n import finger
 
 KEY_SIZE = 98
 KEY_GAP = 12
@@ -120,7 +121,7 @@ class KeyboardView:
                                  border_radius=3)
 
             if self.show_fingers:
-                ui.draw_text(surface, FINGERS[key], 15, SOFT if active else (90, 96, 130),
+                ui.draw_text(surface, finger(key), 15, SOFT if active else (90, 96, 130),
                              (rect.centerx, rect.bottom + DEPTH + 22), shadow=False)
 
         for key, t, color in self.ripples:

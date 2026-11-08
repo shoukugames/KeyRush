@@ -8,7 +8,7 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame  # noqa: E402
 
-from . import __version__, storage, ui  # noqa: E402
+from . import __version__, i18n, storage, ui  # noqa: E402
 from .audio import Audio, Music  # noqa: E402
 from .config import DIFFICULTIES, FPS, HEIGHT, TITLE, WIDTH  # noqa: E402
 from .scenes import BeatClock, TitleScene  # noqa: E402
@@ -25,6 +25,9 @@ class App:
         except (pygame.error, FileNotFoundError):
             pass
         self.settings = storage.load_settings()
+        if self.settings.get("language") not in (i18n.ENGLISH, i18n.JAPANESE):
+            self.settings["language"] = i18n.detect_language()
+        i18n.set_language(self.settings["language"])
         flags = pygame.SCALED | pygame.RESIZABLE
         if self.settings.get("fullscreen"):
             flags |= pygame.FULLSCREEN
@@ -58,6 +61,11 @@ class App:
         if self.settings["music"]:
             self.music.start()
         storage.save_settings(self.settings)
+
+    def toggle_language(self):
+        self.settings["language"] = i18n.toggle_language()
+        storage.save_settings(self.settings)
+        self.audio.play("select", 0.5)
 
     def toggle_fullscreen(self):
         pygame.display.toggle_fullscreen()
@@ -122,7 +130,7 @@ class App:
 def smoke_test(path):
     """Plays every screen and a full automatic game without a person. Used by the
     build scripts to prove a packaged copy really runs."""
-    from .scenes import (CreditsScene, GameOverScene, ParentsScene, PlayScene, TopTenScene)
+    from .scenes import (CreditsScene, GameOverScene, ParentsScene, PlayScene, TitleScene, TopTenScene)
     app = App(autoplay=True, seed=1)
     app.audio.wait_ready()
     dt = 1 / 60
@@ -139,14 +147,20 @@ def smoke_test(path):
                 return
 
     run(1.0)
-    for scene in (TopTenScene(app), ParentsScene(app), CreditsScene(app)):
-        app.goto(scene)
-        run(0.3)
+    for language in (i18n.JAPANESE, i18n.ENGLISH):   # every screen in both languages
+        i18n.set_language(language)
+        for scene in (TitleScene(app), TopTenScene(app), ParentsScene(app), CreditsScene(app)):
+            app.goto(scene)
+            run(0.3)
+        for tab in ("progress", "mistakes"):
+            app.goto(ParentsScene(app))
+            app.scene.tab = tab
+            run(0.2)
     app.settings["difficulty"] = "easy"
     play = PlayScene(app, "easy")
     app.goto(play)
     run(240, until=lambda: not isinstance(app.scene, PlayScene))
-    game = play.game
+    game = first_game = play.game
     if not isinstance(app.scene, GameOverScene):
         raise RuntimeError("the automatic game never reached game over")
     if app.scene.entering:
@@ -155,9 +169,18 @@ def smoke_test(path):
         app.handle(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, unicode="\r", mod=0))
         run(0.3)
     app.goto(ParentsScene(app))
+    app.scene.tab = "mistakes"
     run(0.2)
-    result = (f"ok version={__version__} frames={frames} score={game.score} round={game.round} "
-              f"sequences={game.sequences_done} audio={'ready' if app.audio.ready else 'off'}")
+    i18n.set_language(i18n.JAPANESE)   # a second game in Japanese, with mistakes
+    play = PlayScene(app, "medium")
+    app.goto(play)
+    run(240, until=lambda: not isinstance(app.scene, PlayScene))
+    run(0.3)
+    app.goto(ParentsScene(app))
+    app.scene.tab = "mistakes"
+    run(0.2)
+    result = (f"ok version={__version__} frames={frames} score={first_game.score} round={first_game.round} "
+              f"sequences={first_game.sequences_done} japanese_game_score={play.game.score} audio={'ready' if app.audio.ready else 'off'}")
     with open(path, "w", encoding="utf-8") as handle:
         handle.write(result + "\n")
     pygame.quit()

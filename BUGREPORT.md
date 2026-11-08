@@ -19,9 +19,10 @@ The game saves the details to a file named `crash.log`. Please attach it to your
 Copy this into your email and fill in what you can.
 
 ```text
-Game version:      (Credits screen, for example v0.1.0)
+Game version:      (Credits screen, for example v0.1.1)
 Installed from:    (.deb / Windows .exe / source)
 Operating system:  (for example Ubuntu 24.04, or Windows 11)
+Language:          (English / 日本語)
 Difficulty:        (Easy / Medium / Hard)
 Round:             (for example Round 5)
 Keyboard layout:   (for example US QWERTY, UK, German QWERTZ)
@@ -50,6 +51,8 @@ Crash log or screenshot:     (attach if you have one)
 | The Windows `.exe` has no console, so `--version` prints nothing. | The version is on the Credits screen. |
 | Sound and music are checked by automated tests, not yet by listening on real speakers. | Please tell us about any sound that seems wrong or too loud. |
 | The game listens for the letters A S D F G H J K L ;. On AZERTY, QWERTZ (the ; key), Dvorak and other layouts, some of those letters aren't on the home row. | Switch to a US or UK QWERTY layout while playing. |
+| The Japanese text has not yet been reviewed by a native speaker. | Please tell us about any wording that seems wrong. |
+| Top 10 names can only use English letters and numbers. Japanese input (IME) isn't supported in name entry. | Type the name in rōmaji, for example YUKI. |
 | The music takes a few seconds to start the first time the title screen opens, while the instruments are built. | None needed. It starts on its own. |
 
 ## Reset saved data

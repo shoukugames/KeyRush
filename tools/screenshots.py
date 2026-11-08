@@ -17,13 +17,15 @@ sys.path.insert(0, ROOT)
 
 import pygame  # noqa: E402
 
-from keyrush import storage  # noqa: E402
+from keyrush import i18n, storage  # noqa: E402
 from keyrush.app import App  # noqa: E402
 from keyrush.logic import Game  # noqa: E402
 from keyrush.scenes import (CreditsScene, GameOverScene, ParentsScene, PlayScene,  # noqa: E402
                             TitleScene, TopTenScene)
 
+# Usage: screenshots.py [folder] [en|ja]
 out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "screenshots")
+LANG = sys.argv[2] if len(sys.argv) > 2 else "en"
 os.makedirs(out, exist_ok=True)
 
 # Sample history: a few simulated games on each difficulty
@@ -44,6 +46,7 @@ for i in range(16):
     storage.add_score(scores, diff, names[i % len(names)], g.score, g.round)
 
 app = App(seed=4)
+i18n.set_language(LANG)
 app.audio.wait_ready()
 app.stats, app.scores = storage.load_stats(), storage.load_scores()
 

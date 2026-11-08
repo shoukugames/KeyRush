@@ -6,7 +6,7 @@ Key Rush is a memory and touch-typing game for the keyboard's home row, for ages
 The home-row keys light up one by one to an ambient beat. Repeat them in the same order,
 like the classic Simon game. The rounds never end, and each one gets a little longer and faster.
 
-Version **0.1.0**, released 2026-11-08. Created by **Shawn Rapaz** and made with **Claude Code**.
+Version **0.1.1**, released 2026-11-08. Plays in **English** and **Japanese (日本語)**. Created by **Shawn Rapaz** and made with **Claude Code**.
 Website: <https://shoukugames.org/>. Email: <info@shoukugames.org>
 
 ## How to play
@@ -44,10 +44,21 @@ Pressing keys while you're still watching doesn't count against you.
 | Home-row keys | Play |
 | Esc | Pause (Q from the pause screen quits to the title) |
 | M | Music on or off |
+| L | Switch between English and 日本語 (title screen) |
 | F11 | Full screen |
+
+## Languages / 言語
+
+Everything in the game is in both English and Japanese: menus, play messages, finger names,
+the For Parents pages and the credits. Choose **LANGUAGE / 言語** on the title screen
+(or press **L**). The first time it starts, the game picks Japanese on a Japanese system,
+otherwise English. The choice is saved. The keys stay as the letters printed on the keyboard.
+
+ゲームは英語と日本語に対応しています。タイトル画面の「言語」（または L キー）で切り替えられます。
 
 ## Title screen
 
+- **Language**: English or 日本語.
 - **Play**, and a **difficulty select** (Easy, Medium, Hard). Score and high score show at the top while you play.
 - **Top 10**: a table for each difficulty. A Top 10 score asks for the player's name.
 - **For Parents** has two pages:
@@ -71,8 +82,8 @@ the music. Soft percussion is added layer by layer as the rounds go up.
 
 | System | File | How |
 |---|---|---|
-| Debian / Ubuntu (64-bit) | `keyrush_v0.1.0_amd64.deb` | `sudo apt install ./keyrush_v0.1.0_amd64.deb`, then find **Key Rush** in your games menu or run `keyrush` |
-| Windows 10/11 (64-bit) | `KeyRush-v0.1.0.exe` | Double-click it. Nothing needs to be installed. |
+| Debian / Ubuntu (64-bit) | `keyrush_v0.1.1_amd64.deb` | `sudo apt install ./keyrush_v0.1.1_amd64.deb`, then find **Key Rush** in your games menu or run `keyrush` |
+| Windows 10/11 (64-bit) | `KeyRush-v0.1.1.exe` | Double-click it. Nothing needs to be installed. |
 
 Saved data (scores, statistics, settings) is kept in `~/.local/share/keyrush/` on Linux
 and in `%APPDATA%\KeyRush\` on Windows.
@@ -104,7 +115,7 @@ For development:
 ```bash
 python3 -m pip install -r requirements-dev.txt
 python3 -m pytest                       # rules, saved data and sound tests
-python3 tools/screenshots.py            # a PNG of every screen into build/screenshots
+python3 tools/screenshots.py [dir] [en|ja]   # a PNG of every screen (default build/screenshots)
 python3 tools/make_icon.py              # redraw assets/icon.png and icon.ico
 ```
 
@@ -118,6 +129,7 @@ keyrush/
   keyboard.py  the on-screen home row
   ui.py        fonts, glows, panels, background and particles
   storage.py   Top 10, statistics and settings (JSON)
+  i18n.py      English and Japanese text
   config.py    difficulty curves, rules and colours
 packaging/     PyInstaller spec, .desktop file and build scripts
 tests/         pytest suite

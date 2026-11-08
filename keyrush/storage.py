@@ -67,7 +67,7 @@ def today():
 
 
 # Settings -------------------------------------------------------------------
-DEFAULT_SETTINGS = {"difficulty": "easy", "music": True, "sound": True, "fullscreen": False}
+DEFAULT_SETTINGS = {"difficulty": "easy", "music": True, "sound": True, "fullscreen": False, "language": ""}
 
 
 def load_settings():
