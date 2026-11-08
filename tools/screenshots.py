@@ -85,8 +85,28 @@ play.press(next(k for k in g.keys if k != g.expected_key))
 run(0.15)
 shot("04_play_mistake")
 
-app.goto(GameOverScene(app, g))
+# Play on correctly into round 3, catching a key mid-press at the higher tempo
+while g.round < 3:
+    run(1 / 60)
+    if g.expected_key:
+        play.press(g.expected_key)
+        run(0.1)
+while g.state != "input":
+    run(1 / 60)
+for _ in range(3):
+    play.press(g.expected_key)
+    run(0.1)
+shot("04b_play_round3")
+
+# Then two more slips end the game, and the game over screen shows the real result
+while not g.over:
+    run(1 / 60)
+    if g.expected_key:
+        play.press(next(k for k in g.keys if k != g.expected_key))
+while not isinstance(app.scene, GameOverScene):
+    run(1 / 60)
 app.scene.entering = True
+app.scene.text_input = True
 app.scene.name = "MAYA"
 run(0.5)
 shot("05_game_over_name")
