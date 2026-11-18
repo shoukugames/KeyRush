@@ -8,7 +8,7 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame  # noqa: E402
 
-from . import __version__, i18n, storage, ui  # noqa: E402
+from . import WEB, __version__, i18n, storage, ui  # noqa: E402
 from .audio import Audio, Music  # noqa: E402
 from .config import DIFFICULTIES, FPS, HEIGHT, TITLE, WIDTH  # noqa: E402
 from .scenes import BeatClock, TitleScene  # noqa: E402
@@ -47,6 +47,8 @@ class App:
         self.fade = 1.0
         self.scene = TitleScene(self)
         self.was_menu = False
+        # Touch screens: tappable keycaps and tap-to-continue. On for touch screens, or on the first touch.
+        self.touch = WEB and _has_touch_screen()
 
     def difficulty_keys(self):
         return DIFFICULTIES[self.settings["difficulty"]]["keys"]
@@ -73,8 +75,10 @@ class App:
         storage.save_settings(self.settings)
 
     def handle(self, event):
+        if event.type == pygame.FINGERDOWN:
+            self.touch = True
         if event.type == pygame.QUIT:
-            self.running = False
+            self.running = WEB  # in a browser there is nothing to quit to
             return
         if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN):
             self.mouse = event.pos
@@ -115,16 +119,35 @@ class App:
         if isinstance(self.scene, PlayScene):
             self.scene.record(self.scene.game.over)
 
+    def frame(self):
+        dt = min(0.05, self.clock.tick(FPS) / 1000.0)
+        for event in pygame.event.get():
+            self.handle(event)
+        self.step(dt)
+        self.draw()
+        pygame.display.flip()
+
     def run(self):
         while self.running:
-            dt = min(0.05, self.clock.tick(FPS) / 1000.0)
-            for event in pygame.event.get():
-                self.handle(event)
-            self.step(dt)
-            self.draw()
-            pygame.display.flip()
+            self.frame()
         self.shutdown()
         pygame.quit()
+
+    async def run_web(self):
+        """Browser main loop: hands control back to the page after every frame."""
+        import asyncio
+        while True:  # a web page has no "quit"; closing the tab ends the game
+            self.running = True
+            self.frame()
+            await asyncio.sleep(0)
+
+
+def _has_touch_screen():
+    try:
+        import platform  # pygbag's bridge to the page
+        return int(platform.window.navigator.maxTouchPoints) > 0
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def smoke_test(path):

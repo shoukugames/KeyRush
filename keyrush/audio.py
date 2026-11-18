@@ -16,6 +16,8 @@ import threading
 
 import pygame
 
+from . import WEB
+
 SAMPLE_RATE = 22050
 TABLE_SIZE = 8192
 TWO_PI = 2 * math.pi
@@ -222,7 +224,8 @@ class Audio:
         self.sounds = {}
         self._raw = None
         try:
-            pygame.mixer.quit()
+            if not WEB:  # in a browser, closing and reopening the audio device hangs the page
+                pygame.mixer.quit()
             pygame.mixer.init(SAMPLE_RATE, -16, 2, 512)
             pygame.mixer.set_num_channels(32)
             pygame.mixer.set_reserved(2)
@@ -230,13 +233,34 @@ class Audio:
             self.enabled = True
         except pygame.error:
             return
+        if WEB:
+            # Making every sample takes seconds even on a PC and browsers run no Python threads,
+            # so the web build ships them pre-made (tools/build_web.py) and poll() loads them.
+            return
         threading.Thread(target=self._build, daemon=True).start()
 
     def _build(self):
         self._raw = build_all()
 
+    def _load_web_sounds(self):
+        import json
+        import os
+        from .ui import resource
+        folder = resource("web_sounds")
+        try:
+            with open(os.path.join(folder, "index.json"), encoding="utf-8") as handle:
+                names = json.load(handle)
+            self.sounds = {name: pygame.mixer.Sound(os.path.join(folder, f"{name}.ogg")) for name in names}
+        except (OSError, ValueError, pygame.error):
+            self.sounds = {}
+        self.ready = True
+
     def poll(self):
         """Turns finished samples into Sounds, on the main thread."""
+        if WEB:
+            if self.enabled and not self.ready:
+                self._load_web_sounds()
+            return
         if self.enabled and not self.ready and self._raw is not None:
             self.sounds = {name: pygame.mixer.Sound(buffer=data) for name, data in self._raw.items()}
             self._raw = None

@@ -10,6 +10,7 @@ import os
 import sys
 import tempfile
 
+from . import WEB
 from .config import DIFFICULTY_ORDER, NAME_LENGTH, TOP_SCORES
 
 HISTORY_LENGTH = 30
@@ -33,7 +34,20 @@ def data_dir():
     return path
 
 
+# In a web browser files vanish when the page closes, so saves go to the browser's localStorage.
+def _web_storage():
+    import platform  # pygbag's bridge to the page
+    return platform.window.localStorage
+
+
 def _load(name, default):
+    if WEB:
+        try:
+            raw = _web_storage().getItem(f"keyrush/{name}")
+            data = json.loads(raw) if raw else default
+            return data if isinstance(data, type(default)) else default
+        except Exception:  # noqa: BLE001
+            return default
     path = os.path.join(data_dir(), name)
     try:
         with open(path, encoding="utf-8") as handle:
@@ -52,6 +66,12 @@ def _load(name, default):
 
 
 def _save(name, data):
+    if WEB:
+        try:
+            _web_storage().setItem(f"keyrush/{name}", json.dumps(data))
+        except Exception as error:  # noqa: BLE001
+            print(f"Key Rush: could not save {name}: {error}", file=sys.stderr)
+        return
     path = os.path.join(data_dir(), name)
     temp = path + ".tmp"
     try:

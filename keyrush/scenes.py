@@ -7,7 +7,7 @@ import webbrowser
 
 import pygame
 
-from . import RELEASE_DATE, __version__, i18n, storage, ui
+from . import WEB, RELEASE_DATE, __version__, i18n, storage, ui
 from .config import (ACCENT, BAD, CREATOR, DIFFICULTY_ORDER, DIM, EMAIL, FINGER_COLORS, GOLD, GOOD,
                      HEIGHT, HOME_ROW, MAX_MISTAKES, NAME_LENGTH, SEQUENCES_PER_ROUND, SOFT, WEBSITE,
                      WHITE, WIDTH, key_label)
@@ -112,6 +112,8 @@ class TitleScene(Scene):
 
     def __init__(self, app):
         super().__init__(app)
+        if WEB:  # a web page has nothing to quit to
+            self.ITEMS = [item for item in TitleScene.ITEMS if item != "quit"]
         self.selected = 0
         self.item_rects = {}
         self.logo_light = [0.0] * 7
@@ -176,7 +178,7 @@ class TitleScene(Scene):
                 self.app.toggle_language()
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                 self.activate(self.ITEMS[self.selected])
-            elif event.key == pygame.K_ESCAPE:
+            elif event.key == pygame.K_ESCAPE and not WEB:
                 self.app.running = False
         elif event.type == pygame.MOUSEMOTION:
             for item, rect in self.item_rects.items():
@@ -303,6 +305,16 @@ class PlayScene(Scene):
     def handle(self, event):
         if event.type == pygame.WINDOWFOCUSLOST and not self.game.over:
             self.paused = True
+            return
+        if self.app.touch and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Touch screens: tap the on-screen keycaps; a tap anywhere resumes a paused game.
+            if self.paused:
+                self.paused = False
+                return
+            for key, rect in self.keyboard.rects.items():
+                if key in self.keyboard.active and rect.collidepoint(event.pos):
+                    self.press(key)
+                    return
             return
         if event.type != pygame.KEYDOWN:
             return
@@ -549,6 +561,15 @@ class GameOverScene(Scene):
     def handle(self, event):
         if self.clicked_back(event):
             self.app.goto(TitleScene(self.app))
+            return
+        if self.app.touch and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Touch screens have no keyboard: a tap saves the score under the last name used,
+            # the next tap plays again.
+            if self.entering:
+                self.save()
+            else:
+                self.app.audio.play("start", 0.8)
+                self.app.goto(PlayScene(self.app, self.difficulty))
             return
         if event.type != pygame.KEYDOWN:
             return
@@ -909,7 +930,11 @@ class CreditsScene(Scene):
             for url, rect in self.links.items():
                 if rect.collidepoint(event.pos):
                     try:
-                        webbrowser.open(url)
+                        if WEB:
+                            import platform  # pygbag's bridge to the page
+                            platform.window.open(url, "_blank")
+                        else:
+                            webbrowser.open(url)
                     except Exception:  # noqa: BLE001 - a browser problem must never stop the game
                         pass
         elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN,

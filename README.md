@@ -78,6 +78,24 @@ Each key plays its own bell note from a pentatonic scale, so every sequence soun
 The game shows one key per beat and changes tempo on the beat, so the keys always land on
 the music. Soft percussion is added layer by layer as the rounds go up.
 
+## Play in the browser
+
+Key Rush also runs in a web browser, on computers, phones and tablets, with nothing to
+install: <https://shoukugames.org/play/key-rush/> (test page). On touch screens, tap the
+on-screen keycaps to type the sequence back; a tap resumes a paused game, and on the results
+screen a tap saves the score (under the last name used) and the next one plays again. Scores
+and statistics are saved in the browser.
+
+```bash
+python3 -m pip install pygame pygbag     # plus ffmpeg on PATH (or FFMPEG=/path/to/ffmpeg)
+python3 tools/build_web.py               # -> build/web/: upload the folder as-is
+```
+
+The build renders every sound once into `web_sounds/` (making them takes seconds even on a
+PC, too slow for a browser), then packs the game with [pygbag](https://pygame-web.github.io/).
+`main.py` is the web entry point; the browser-only parts switch on only in the browser.
+`keyrush.apk` is pygbag's name for its bundle of game files; it is not an Android app.
+
 ## Install
 
 | System | File | How |
