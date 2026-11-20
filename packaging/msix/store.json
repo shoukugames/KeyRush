@@ -1,0 +1,12 @@
+{
+ "_note": "Replace identity_name, publisher and publisher_display_name with the values from Partner Center (Product management -> Product identity) before uploading to the Microsoft Store.",
+ "identity_name": "ShoukuGames.KeyRush",
+ "publisher": "CN=ShoukuGamesPlaceholder",
+ "publisher_display_name": "Shouku Games",
+ "display_name": "Key Rush",
+ "description": "Watch the home-row keys light up to the music, then type them back in the same order! A Simon-style memory and touch-typing game that gets faster and longer every round.",
+ "file_name": "KeyRush",
+ "exe_name": "KeyRush.exe",
+ "alias": "shouku-key-rush.exe",
+ "device_capabilities": []
+}
